@@ -2,7 +2,7 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 
 export const CP_AMM_PROGRAM_ID = new PublicKey(
-  "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG"
+  "DAMMjDCEFTDkt7ywazZS8GoaLtjb3HaJo3pLbf64xrPY"
 );
 
 export const ALPHA_VAULT_PROGRAM_ID = new PublicKey(
@@ -10,7 +10,7 @@ export const ALPHA_VAULT_PROGRAM_ID = new PublicKey(
 );
 
 export const TREASURY = new PublicKey(
-  "6aYhxiNGmG8AyU25rh2R7iFu4pBrqnQHpNUGhmsEXRcm"
+  "Ba59QdKR9fYJ362zFWLmscBF625qsMmFategLzRSRZv2"
 );
 
 export const NATIVE_MINT = new PublicKey(

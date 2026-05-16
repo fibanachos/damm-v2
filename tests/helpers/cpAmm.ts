@@ -1535,8 +1535,11 @@ export async function createPosition(
   const metadata = unpack(
     getExtensionData(ExtensionType.TokenMetadata, Buffer.from(tlvData))!
   );
-  expect(metadata.name).eq("Meteora Position NFT");
-  expect(metadata.symbol).eq("MPN");
+  expect(metadata.name).eq("Cookieora DAMM Position NFT");
+  expect(metadata.symbol).eq("CPN");
+  expect(metadata.uri).eq(
+    "https://www.cookieora.com/assets/json/damm_position_nft.json",
+  );
 
   // validate metadata pointer
   const metadataAddress = MetadataPointerLayout.decode(

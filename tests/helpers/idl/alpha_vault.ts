@@ -1069,7 +1069,7 @@ export type AlphaVault = {
         },
         {
           "name": "ammProgram",
-          "address": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG"
+          "address": "DAMMjDCEFTDkt7ywazZS8GoaLtjb3HaJo3pLbf64xrPY"
         },
         {
           "name": "poolAuthority"

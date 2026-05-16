@@ -202,6 +202,12 @@ pub mod seeds {
 
 pub mod treasury {
     use anchor_lang::{prelude::Pubkey, solana_program::pubkey};
-    // https://app.squads.so/squads/6aYhxiNGmG8AyU25rh2R7iFu4pBrqnQHpNUGhmsEXRcm/treasury
-    pub const ID: Pubkey = pubkey!("6aYhxiNGmG8AyU25rh2R7iFu4pBrqnQHpNUGhmsEXRcm");
+    // Cookie Chain protocol fee recipient
+    pub const ID: Pubkey = pubkey!("Ba59QdKR9fYJ362zFWLmscBF625qsMmFategLzRSRZv2");
+}
+
+pub mod position_nft_metadata {
+    pub const NAME: &str = "Cookieora DAMM Position NFT";
+    pub const SYMBOL: &str = "CPN";
+    pub const URI: &str = "https://www.cookieora.com/assets/json/damm_position_nft.json";
 }

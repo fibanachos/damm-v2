@@ -6,7 +6,10 @@ use anchor_spl::{
 
 use crate::{
     const_pda,
-    constants::seeds::{POSITION_NFT_ACCOUNT_PREFIX, POSITION_PREFIX},
+    constants::{
+        position_nft_metadata::{NAME as POSITION_NFT_NAME, SYMBOL as POSITION_NFT_SYMBOL, URI as POSITION_NFT_URI},
+        seeds::{POSITION_NFT_ACCOUNT_PREFIX, POSITION_PREFIX},
+    },
     get_pool_access_validator,
     state::{Pool, Position},
     token::update_account_lamports_to_minimum_balance,
@@ -139,9 +142,9 @@ pub fn create_position_nft<'info>(
     let cpi_ctx = CpiContext::new_with_signer(token_program.clone(), cpi_accounts, signer_seeds);
     token_metadata_initialize(
         cpi_ctx,
-        String::from("Meteora Position NFT"), // TODO do we need to allow user to input custom name?
-        String::from("MPN"),
-        String::from("https://raw.githubusercontent.com/MeteoraAg/token-metadata/main/meteora_position_nft.png"), 
+        String::from(POSITION_NFT_NAME),
+        String::from(POSITION_NFT_SYMBOL),
+        String::from(POSITION_NFT_URI),
     )?;
 
     // transfer minimum rent to mint account

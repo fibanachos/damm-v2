@@ -38,7 +38,7 @@ pub use entrypoint::entrypoint;
 
 pub mod params;
 
-declare_id!("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+declare_id!("DAMMjDCEFTDkt7ywazZS8GoaLtjb3HaJo3pLbf64xrPY");
 
 // Only for IDL generation
 #[cfg(feature = "idl-build")]
