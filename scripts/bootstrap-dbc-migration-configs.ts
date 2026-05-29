@@ -13,6 +13,7 @@
  *   DBC_PROGRAM_ID        default DBCg4ugDEztk6MbqHEJvx5a5YGJTj45Jb5NvtQ48Rvsf
  *   DBC_POOL_AUTHORITY    optional override (else derived from DBC_PROGRAM_ID)
  *   START_INDEX           optional first index to try (default: max(existing)+1)
+ *   POOL_AUTHORITY_FUND_LAMPORTS  target lamports for pool_authority (default 1_000_000_000 = 1 COOK)
  *
  * Flags:
  *   --dry-run             print plan only
@@ -37,6 +38,8 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
+  Transaction,
+  sendAndConfirmTransaction,
 } from "@solana/web3.js";
 
 import idlRaw from "../target/idl/cp_amm.json";
@@ -59,6 +62,9 @@ const DBC_PROGRAM_ID = new PublicKey(
 );
 const DRY_RUN = process.argv.includes("--dry-run");
 const START_INDEX_RAW = process.env.START_INDEX;
+const POOL_AUTHORITY_FUND_LAMPORTS = BigInt(
+  process.env.POOL_AUTHORITY_FUND_LAMPORTS ?? "1000000000"
+);
 
 /** Cookieora FEE_TIER_PRESETS — src/solana/customizablePoolFees.ts */
 const STATIC_MIGRATION_TIERS = [
@@ -98,6 +104,17 @@ const ACTIVATION_TYPE_TIMESTAMP = 1;
 const COLLECT_FEE_MODE_QUOTE = 0;
 const ALL_OPERATOR_PERMISSIONS = new BN((1 << 12) - 1);
 
+/** Dynamic fee enabled on every migrated pool. Mirrors DBC's bonding-curve dynamic fee. */
+const DYNAMIC_FEE_PARAMS = {
+  binStep: 1,
+  binStepU128: new BN("1844674407370955"),
+  filterPeriod: 10,
+  decayPeriod: 120,
+  reductionFactor: 5000,
+  maxVolatilityAccumulator: 14_460_000,
+  variableFeeControl: 956,
+};
+
 type ConfigAccount = {
   publicKey: PublicKey;
   account: {
@@ -108,6 +125,7 @@ type ConfigAccount = {
     collectFeeMode: number;
     poolFees: {
       baseFee: { data: number[] };
+      dynamicFee?: { initialized: number };
     };
   };
 };
@@ -207,6 +225,43 @@ function formatOccupiedIndexes(indexes: Set<number>): string {
   return `${ranges.join(", ")} (${sorted.length} occupied)`;
 }
 
+async function ensurePoolAuthorityFunded(
+  connection: Connection,
+  funder: Keypair,
+  poolAuthority: PublicKey,
+  targetLamports: bigint
+) {
+  const balance = BigInt(await connection.getBalance(poolAuthority, "confirmed"));
+  if (balance >= targetLamports) {
+    console.log(
+      `Pool authority funded: ${poolAuthority.toBase58()} = ${balance} lamports (≥ ${targetLamports})`
+    );
+    return;
+  }
+
+  const needed = targetLamports - balance;
+  if (DRY_RUN) {
+    console.log(
+      `Would top up pool authority ${poolAuthority.toBase58()} by ${needed} lamports (current ${balance}, target ${targetLamports})`
+    );
+    return;
+  }
+
+  const tx = new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: funder.publicKey,
+      toPubkey: poolAuthority,
+      lamports: Number(needed),
+    })
+  );
+  const sig = await sendAndConfirmTransaction(connection, tx, [funder], {
+    commitment: "confirmed",
+  });
+  console.log(
+    `✓ Topped up pool authority by ${needed} lamports (now ${targetLamports}): ${sig}`
+  );
+}
+
 async function ensureOperator(
   program: Program<Idl>,
   connection: Connection,
@@ -273,6 +328,12 @@ async function main() {
   console.log("");
 
   await ensureOperator(program, connection, operatorPda, wallet.publicKey);
+  await ensurePoolAuthorityFunded(
+    connection,
+    adminKp,
+    poolAuthority,
+    POOL_AUTHORITY_FUND_LAMPORTS
+  );
 
   const existing = await fetchExistingDbcConfigs(program, poolAuthority);
   const maxExistingIndex = existing.reduce(
@@ -314,6 +375,7 @@ async function main() {
       if (row.account.configType !== 0) return false;
       if (row.account.activationType !== ACTIVATION_TYPE_TIMESTAMP) return false;
       if (row.account.collectFeeMode !== COLLECT_FEE_MODE_QUOTE) return false;
+      if (row.account.poolFees.dynamicFee?.initialized !== 1) return false;
       return cliffNumeratorFromConfig(row.account) === tier.cliffFeeNumerator;
     });
 
@@ -355,7 +417,7 @@ async function main() {
             baseFee: { data: Array.from(baseFeeBlob) },
             compoundingFeeBps: 0,
             padding: 0,
-            dynamicFee: null,
+            dynamicFee: DYNAMIC_FEE_PARAMS,
           },
           sqrtMinPrice: MIN_SQRT_PRICE,
           sqrtMaxPrice: MAX_SQRT_PRICE,
