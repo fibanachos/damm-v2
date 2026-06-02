@@ -1535,10 +1535,10 @@ export async function createPosition(
   const metadata = unpack(
     getExtensionData(ExtensionType.TokenMetadata, Buffer.from(tlvData))!
   );
-  expect(metadata.name).eq("Cookieora DAMM Position NFT");
+  expect(metadata.name).eq("CookieBox DAMM Position NFT");
   expect(metadata.symbol).eq("CPN");
   expect(metadata.uri).eq(
-    "https://www.cookieora.com/assets/json/damm_position_nft.json",
+    "https://www.cookiebox.app/assets/json/damm_position_nft.json",
   );
 
   // validate metadata pointer

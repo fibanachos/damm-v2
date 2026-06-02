@@ -1,7 +1,7 @@
 /**
  * Create DAMM v2 static/dynamic configs for Dynamic Bonding Curve migration on Cookie Chain.
  *
- * Uses Cookieora fixed fee tiers (0.25% / 0.3% / 1% / 2% / 4%) mapped to DBC
+ * Uses CookieBox fixed fee tiers (0.25% / 0.3% / 1% / 2% / 4%) mapped to DBC
  * migration_fee_option 0..4, plus one dynamic config for migration_fee_option 6.
  *
  * Each config sets pool_creator_authority to the DBC pool-authority PDA so only DBC
@@ -66,7 +66,7 @@ const POOL_AUTHORITY_FUND_LAMPORTS = BigInt(
   process.env.POOL_AUTHORITY_FUND_LAMPORTS ?? "1000000000"
 );
 
-/** Cookieora FEE_TIER_PRESETS — src/solana/customizablePoolFees.ts */
+/** CookieBox FEE_TIER_PRESETS — src/solana/customizablePoolFees.ts */
 const STATIC_MIGRATION_TIERS = [
   {
     migrationFeeOption: 0,

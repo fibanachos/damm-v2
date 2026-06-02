@@ -207,7 +207,7 @@ pub mod treasury {
 }
 
 pub mod position_nft_metadata {
-    pub const NAME: &str = "Cookieora DAMM Position NFT";
+    pub const NAME: &str = "CookieBox DAMM Position NFT";
     pub const SYMBOL: &str = "CPN";
-    pub const URI: &str = "https://www.cookieora.com/assets/json/damm_position_nft.json";
+    pub const URI: &str = "https://www.cookiebox.app/assets/json/damm_position_nft.json";
 }
