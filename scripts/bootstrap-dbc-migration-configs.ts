@@ -7,6 +7,11 @@
  * Each config sets pool_creator_authority to the DBC pool-authority PDA so only DBC
  * can initialize migrated pools against it.
  *
+ * Static tiers use collect_fee_mode = OnlyB (1) so migrated pools collect fees in the
+ * quote token (COOK) only. Re-running after this change creates NEW configs (new indexes)
+ * — the previous BothToken (0) configs stay on-chain but become unused once
+ * cookiebox `DBC_MIGRATION_FEE_CONFIGS` is repointed at the new addresses printed below.
+ *
  * ENV:
  *   COOKIE_RPC            default https://rpc.cookiescan.io
  *   ADMIN_KEYPAIR         required — cp-amm admin + operator whitelist key
@@ -101,7 +106,12 @@ const STATIC_MIGRATION_TIERS = [
 ] as const;
 
 const ACTIVATION_TYPE_TIMESTAMP = 1;
-const COLLECT_FEE_MODE_QUOTE = 0;
+/**
+ * cp-amm `CollectFeeMode`: BothToken = 0, OnlyB = 1. At migration token B is the quote
+ * (COOK), so OnlyB = fees collected in COOK only. (The previous value here was 0/BothToken
+ * despite the "QUOTE" name — that is why migrated pools historically collected in both tokens.)
+ */
+const COLLECT_FEE_MODE_ONLY_B = 1;
 const ALL_OPERATOR_PERMISSIONS = new BN((1 << 12) - 1);
 
 /** Dynamic fee enabled on every migrated pool. Mirrors DBC's bonding-curve dynamic fee. */
@@ -374,7 +384,7 @@ async function main() {
     const match = existing.find((row) => {
       if (row.account.configType !== 0) return false;
       if (row.account.activationType !== ACTIVATION_TYPE_TIMESTAMP) return false;
-      if (row.account.collectFeeMode !== COLLECT_FEE_MODE_QUOTE) return false;
+      if (row.account.collectFeeMode !== COLLECT_FEE_MODE_ONLY_B) return false;
       if (row.account.poolFees.dynamicFee?.initialized !== 1) return false;
       return cliffNumeratorFromConfig(row.account) === tier.cliffFeeNumerator;
     });
@@ -424,7 +434,7 @@ async function main() {
           vaultConfigKey: PublicKey.default,
           poolCreatorAuthority: poolAuthority,
           activationType: ACTIVATION_TYPE_TIMESTAMP,
-          collectFeeMode: COLLECT_FEE_MODE_QUOTE,
+          collectFeeMode: COLLECT_FEE_MODE_ONLY_B,
         })
         .accountsPartial({
           config: configPda,
