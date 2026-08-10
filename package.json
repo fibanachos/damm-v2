@@ -5,6 +5,7 @@
     "test": "anchor build -- --features local && yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/*.test.ts",
     "bootstrap:cookie": "tsx scripts/bootstrap-cookie-config.ts",
     "bootstrap:dbc-migration-configs": "tsx scripts/bootstrap-dbc-migration-configs.ts",
+    "bootstrap:momoswap-migration-config": "tsx scripts/bootstrap-momoswap-migration-config.ts",
     "validate:configs": "tsx scripts/validate-configs.ts"
   },
   "dependencies": {
